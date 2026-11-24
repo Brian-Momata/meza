@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Schibsted_Grotesk, Young_Serif } from "next/font/google";
 import { AppShell } from "@/components/shell";
+import { SyncAgent } from "@/components/sync-agent";
 import "./globals.css";
 
 const display = Young_Serif({ weight: "400", subsets: ["latin"], variable: "--font-young-serif" });
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${display.variable} ${sans.variable}`}>
       <body className="min-h-dvh">
         <AppShell>{children}</AppShell>
+        <SyncAgent />
       </body>
     </html>
   );

@@ -10,7 +10,18 @@ npm run dev        # http://localhost:3000
 npm run build && npm start
 ```
 
-Everything is stored in the browser (`localStorage`, key `meza:v1`). There is no backend or account.
+Each phone keeps its plan in the browser (`localStorage`, key `meza:v1`). There are no accounts.
+
+To run the household-sharing API locally, pull the Upstash env vars first: `vercel env pull .env.local --yes`.
+
+## Household sharing
+
+Settings → Household creates a code like `PILAU-7KQ4M2`. Anyone who joins with that code, or opens the `/join/<code>` link, shares the plan, the table settings and the market-list ticks. Saved recipes stay on each phone.
+
+- **Storage:** one Upstash Redis hash per household (`household:<code>`), provisioned through the Vercel Marketplace. Each day, each ticked item and the profile is its own field, so two phones editing different things never overwrite each other. Households no one has opened for 120 days expire.
+- **API:** `POST /api/household` creates a household; `GET` and `PUT /api/household/<code>` read it and apply field-level changes. Input is validated (field names, meal ids, profile ranges, body size).
+- **Client:** `src/lib/sync.ts` pushes local changes about 0.6 s after they happen, and pulls every 15 s while the app is open, on focus, and when the phone comes back online. Edits that haven't been sent yet are never overwritten by a pull.
+- **Region:** functions run in Frankfurt (`vercel.json`), next to the data.
 
 ## What's inside
 
@@ -21,7 +32,8 @@ Everything is stored in the browser (`localStorage`, key `meza:v1`). There is no
 | Week (*Wiki*) | `/plan` | Seven days. Swap or lock any meal, shuffle the rest, look up to three weeks ahead. |
 | Market (*Soko*) | `/shopping` | Combined list for any days you pick, grouped by mama mboga / butchery / fishmonger / dairy / duka / spices, rounded up to what you can buy. Tick items off, copy the list or send it on WhatsApp. |
 | Recipes (*Mapishi*) | `/recipes`, `/recipes/[id]` | Search by dish or ingredient, with filters. Each recipe shows one person's plate (grams + kcal per part), ingredients scaled to any number of people, and a method whose amounts scale too. |
-| Your table | `/settings` | Change people, goal or diet. Changes re-plan from today onward and keep locked or eaten meals. |
+| Your table | `/settings` | Change people, goal or diet. Changes re-plan from today onward and keep locked or eaten meals. Create or join a household. |
+| Join | `/join/<code>` | Invite link: preview a household and join it |
 
 ## How the numbers work
 

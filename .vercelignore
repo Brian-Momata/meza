@@ -1,0 +1,5 @@
+# Local-only files that should never be uploaded by `vercel deploy`.
+.env*
+.next
+node_modules
+*.tsbuildinfo

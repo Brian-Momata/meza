@@ -41,7 +41,25 @@ function read(): AppState {
   return state;
 }
 
-function write(next: AppState) {
+type ChangeHook = (prev: AppState, next: AppState) => void;
+let changeHook: ChangeHook | null = null;
+
+/** Lets the sync module watch local edits without an import cycle. */
+export function onLocalChange(hook: ChangeHook | null) {
+  changeHook = hook;
+}
+
+export function readState(): AppState {
+  return read();
+}
+
+/** Apply state that came from the household; doesn't echo back as a change. */
+export function writeRemote(next: AppState) {
+  write(next, true);
+}
+
+function write(next: AppState, remote = false) {
+  const prev = state;
   state = next;
   try {
     localStorage.setItem(KEY, JSON.stringify(next));
@@ -49,6 +67,7 @@ function write(next: AppState) {
     /* storage full or disabled — keep working in memory */
   }
   listeners.forEach((l) => l());
+  if (!remote && prev && changeHook) changeHook(prev, next);
 }
 
 function subscribe(cb: () => void) {

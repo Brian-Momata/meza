@@ -7,6 +7,7 @@ import { useState } from "react";
 import { resetEverything, saveProfile } from "@/lib/store";
 import type { Profile } from "@/lib/types";
 import { usePlan } from "@/lib/use-plan";
+import { HouseholdPanel } from "./household-panel";
 import { DietField, HabitsField, PeopleField, TargetField } from "./profile-fields";
 import { MobileTopBar, PageHeader, Skeleton } from "./ui";
 
@@ -68,7 +69,10 @@ export function SettingsView() {
           <HabitsField profile={draft} set={set} />
         </div>
       </Section>
-      <Section n="04" title="Start over" hint="Clears your plan, ticks and favourites on this device.">
+      <Section n="04" title="Household" hint="Share one plan and one market list with the people you cook with.">
+        <HouseholdPanel />
+      </Section>
+      <Section n="05" title="Start over" hint="Clears your plan, ticks and favourites on this phone, and leaves any household.">
         <button
           type="button"
           onClick={() => {

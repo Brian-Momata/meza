@@ -61,6 +61,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {app.profile.people} {app.profile.people === 1 ? "person" : "people"}
               </div>
               <div className="tnum mt-0.5 text-sm text-muted">{kcal(app.profile.target)} kcal each a day</div>
+              {app.household && (
+                <div className="mt-2 flex items-center gap-1.5 text-xs text-ink-2">
+                  <span className={`size-1.5 rounded-full ${app.household.status === "ok" || !app.household.status ? "bg-forest" : "bg-clay"}`} />
+                  Shared · {app.household.code}
+                </div>
+              )}
               <div className="mt-3 flex items-center gap-1.5 text-sm font-medium text-forest">
                 <Settings2 className="size-4" strokeWidth={1.8} /> Adjust
               </div>

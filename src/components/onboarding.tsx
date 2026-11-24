@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { saveProfile, useApp } from "@/lib/store";
+import { joinHousehold } from "@/lib/sync";
 import type { Profile } from "@/lib/types";
 import { Logo } from "./logo";
 import { DEFAULT_PROFILE, DietField, HabitsField, PeopleField, TargetField } from "./profile-fields";
@@ -33,6 +34,9 @@ export function Onboarding() {
   const [step, setStep] = useState(-1);
   const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
   const [busy, setBusy] = useState(false);
+  const [joining, setJoining] = useState(false);
+  const [joinCode, setJoinCode] = useState("");
+  const [joinError, setJoinError] = useState<string | null>(null);
 
   // Returning visitors skip straight to today.
   useEffect(() => {
@@ -94,13 +98,50 @@ export function Onboarding() {
                 </li>
               ))}
             </ol>
-            <button
-              type="button"
-              onClick={() => setStep(0)}
-              className="mt-10 inline-flex items-center gap-2 rounded-full bg-forest px-6 py-3.5 text-[15px] font-medium text-paper transition hover:bg-forest-2"
-            >
-              Set up my table <ArrowRight className="size-4" />
-            </button>
+            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <button
+                type="button"
+                onClick={() => setStep(0)}
+                className="inline-flex items-center gap-2 rounded-full bg-forest px-6 py-3.5 text-[15px] font-medium text-paper transition hover:bg-forest-2"
+              >
+                Set up my table <ArrowRight className="size-4" />
+              </button>
+              <button type="button" onClick={() => setJoining((j) => !j)} className="text-[15px] font-medium text-forest underline-offset-4 hover:underline">
+                I have a household code
+              </button>
+            </div>
+            {joining && (
+              <form
+                className="mt-5 flex max-w-md animate-rise flex-wrap gap-2"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setBusy(true);
+                  setJoinError(null);
+                  try {
+                    await joinHousehold(joinCode);
+                    router.replace("/");
+                  } catch (err) {
+                    setJoinError(err instanceof Error ? err.message : "Could not join");
+                    setBusy(false);
+                  }
+                }}
+              >
+                <input
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value)}
+                  placeholder="PILAU-7KQ4M2"
+                  aria-label="Household code"
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  spellCheck={false}
+                  className="min-w-0 flex-1 rounded-full border border-line-2 bg-card px-5 py-3 font-medium uppercase tracking-wider outline-none placeholder:normal-case placeholder:tracking-normal placeholder:text-muted/60 focus:border-forest"
+                />
+                <button type="submit" disabled={busy || !joinCode.trim()} className="rounded-full border border-forest px-5 py-3 text-sm font-medium text-forest hover:bg-forest hover:text-paper disabled:opacity-50">
+                  {busy ? "Joining…" : "Join"}
+                </button>
+                {joinError && <p className="w-full text-sm text-clay">{joinError}</p>}
+              </form>
+            )}
           </div>
         ) : (
           <div key={step} className="w-full max-w-xl animate-rise">

@@ -123,4 +123,14 @@ export interface AppState {
   checked: Record<string, boolean>;
   favorites: string[];
   seed: number;
+  /** Set when this phone shares its plan with a household. */
+  household?: HouseholdLink | null;
+}
+
+export interface HouseholdLink {
+  code: string;
+  /** Last household version this phone has seen. */
+  v: number;
+  syncedAt?: number;
+  status?: "ok" | "offline" | "gone";
 }

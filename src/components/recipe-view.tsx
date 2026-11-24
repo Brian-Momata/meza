@@ -2,13 +2,13 @@
 
 import { ArrowLeft, CalendarPlus, Check, Heart, ListOrdered, Moon } from "lucide-react";
 import Link from "next/link";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo, useState, useSyncExternalStore } from "react";
 import { ingredient } from "@/lib/data/ingredients";
 import { MEAL_LIST, MEALS } from "@/lib/data/meals";
 import { addDays, enDay, monthDay, today } from "@/lib/dates";
-import { amount, duration, inline, kcal } from "@/lib/format";
+import { amount, duration, frac, inline, kcal } from "@/lib/format";
 import { info, type PlatePart } from "@/lib/nutrition";
-import { activeSlots, SLOT_META } from "@/lib/planner";
+import { availableSlots, fitsSlot, SLOT_META } from "@/lib/planner";
 import { scaleRecipe } from "@/lib/shopping";
 import { setMeal, toggleFavorite, useApp } from "@/lib/store";
 import type { Recipe, Slot } from "@/lib/types";
@@ -16,14 +16,29 @@ import { Kcal, MealPhoto, Sheet, Stepper } from "./ui";
 
 const PART_COLORS = ["var(--color-forest)", "var(--color-clay)", "var(--color-maize)", "var(--color-peach)"];
 
-/** How many pieces / portions to cook of one part for `people`. */
-function partCount(part: PlatePart, people: number) {
+const SIZES = [0.75, 1, 1.25, 1.5, 1.75, 2];
+
+/** Plate size from the plan link (`?p=1.5`), read on the client only. */
+function usePlanSize(): number | null {
+  return useSyncExternalStore(
+    () => () => {},
+    () => {
+      const v = Number(new URLSearchParams(window.location.search).get("p"));
+      return v >= 0.5 && v <= 2.5 ? v : null;
+    },
+    () => null,
+  );
+}
+
+/** How many pieces / portions to cook of one part for `people` at plate size `size`. */
+function partCount(part: PlatePart, people: number, size: number) {
   const r = part.recipe;
+  const qty = part.qty * size;
   if (r.unit) {
-    const pieces = Math.max(1, Math.round(people * part.qty));
+    const pieces = Math.max(1, Math.round(people * qty));
     return { portions: pieces, n: pieces, each: r.portion.g, label: `${pieces} ${pieces === 1 ? r.unit.one : r.unit.many}` };
   }
-  return { portions: people * part.qty, n: people, each: r.portion.g * part.qty, label: `${people} ${people === 1 ? "portion" : "portions"}` };
+  return { portions: people * qty, n: people, each: r.portion.g * qty, label: `${people} ${people === 1 ? "portion" : "portions"}` };
 }
 
 export function RecipeView({ id, credit }: { id: string; credit?: { author: string; license: string; source: string } }) {
@@ -32,6 +47,9 @@ export function RecipeView({ id, credit }: { id: string; credit?: { author: stri
   const app = useApp();
   const household = app?.profile?.people;
   const [people, setPeople] = useState<number | null>(null);
+  const planSize = usePlanSize();
+  const [sizePick, setSize] = useState<number | null>(null);
+  const size = sizePick ?? planSize ?? 1;
   const [have, setHave] = useState<Record<string, boolean>>({});
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState<string | null>(null);
@@ -43,11 +61,12 @@ export function RecipeView({ id, credit }: { id: string; credit?: { author: stri
   const parts = useMemo(
     () =>
       mi.plate.map((p) => {
-        const count = partCount(p, n);
+        const count = partCount(p, n, size);
         return { part: p, count, lines: scaleRecipe(p.recipe, count.portions) };
       }),
-    [mi, n],
+    [mi, n, size],
   );
+  const nn = { kcal: mi.n.kcal * size, p: mi.n.p * size, c: mi.n.c * size, f: mi.n.f * size };
 
   const related = MEAL_LIST.filter((m) => m.id !== id && m.slots.some((s) => meal.slots.includes(s)))
     .map((m) => ({ m, score: (m.region === meal.region ? 2 : 0) + ((hash(m.id + id) % 100) / 100) }))
@@ -107,8 +126,8 @@ export function RecipeView({ id, credit }: { id: string; credit?: { author: stri
           <p className="mt-5 max-w-[52ch] text-[15px] leading-relaxed text-ink-2">{meal.blurb}</p>
           <dl className="mt-7 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line bg-line">
             {[
-              { label: "Per person", value: <Kcal value={mi.n.kcal} /> },
-              { label: "Protein", value: <span className="tnum">{Math.round(mi.n.p)} g</span> },
+              { label: "Per person", value: <Kcal value={nn.kcal} /> },
+              { label: "Protein", value: <span className="tnum">{Math.round(nn.p)} g</span> },
               { label: "Total time", value: duration(meal.minutes) },
             ].map(({ label, value }) => (
               <div key={label} className="bg-card px-4 py-4">
@@ -124,13 +143,16 @@ export function RecipeView({ id, credit }: { id: string; credit?: { author: stri
       <section className="mt-14 rounded-[28px] border border-line bg-card p-6 sm:p-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <div className="eyebrow text-muted">One person&rsquo;s plate</div>
+            <div className="eyebrow text-muted">
+              One person&rsquo;s plate
+              {planSize && planSize === size && <span className="ml-2 normal-case tracking-normal text-clay">· sized by your plan</span>}
+            </div>
             <h2 className="font-display mt-2 text-[28px] leading-tight">
-              Serve this, and it&rsquo;s <span className="tnum text-forest">{kcal(mi.n.kcal)}</span> kcal
+              Serve this, and it&rsquo;s <span className="tnum text-forest">{kcal(nn.kcal)}</span> kcal
             </h2>
           </div>
           <div className="tnum text-sm text-muted">
-            ≈ {Math.round(mi.plateGrams / 10) * 10} g of food · P {Math.round(mi.n.p)} g · C {Math.round(mi.n.c)} g · F {Math.round(mi.n.f)} g
+            ≈ {Math.round((mi.plateGrams * size) / 10) * 10} g of food · P {Math.round(nn.p)} g · C {Math.round(nn.c)} g · F {Math.round(nn.f)} g
           </div>
         </div>
         <div className="mt-6 flex h-3 overflow-hidden rounded-full">
@@ -145,23 +167,46 @@ export function RecipeView({ id, credit }: { id: string; credit?: { author: stri
               <div>
                 <div className="text-[15px] font-medium">
                   {p.recipe.name}
-                  {p.recipe.unit && p.qty !== 1 && <span className="text-muted"> × {p.qty}</span>}
                 </div>
                 <div className="mt-0.5 text-sm leading-snug text-ink-2">
-                  {p.recipe.unit && p.qty > 1
-                    ? `${p.qty} ${p.recipe.unit.many}`
-                    : p.qty < 1
-                      ? `${Math.round(p.qty * 100)}% of a full portion (${p.recipe.portion.looks})`
+                  {p.recipe.unit && p.qty * size !== 1
+                    ? `${frac(p.qty * size)} ${p.qty * size > 1 ? p.recipe.unit.many : p.recipe.unit.one}`
+                    : p.qty * size !== 1
+                      ? `${frac(p.qty * size)}× a standard portion: ${p.recipe.portion.looks}`
                       : p.recipe.portion.looks}
                 </div>
                 <div className="tnum mt-1 text-xs text-muted">
-                  {Math.round(p.grams / 5) * 5} g · {kcal(p.n.kcal)} kcal
+                  {Math.round((p.grams * size) / 5) * 5} g · {kcal(p.n.kcal * size)} kcal
                 </div>
               </div>
             </li>
           ))}
         </ul>
       </section>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <span className="text-sm text-muted">Plate size</span>
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Plate size">
+          {SIZES.map((v) => (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={v === size}
+              onClick={() => setSize(v)}
+              className={`tnum rounded-full border px-3 py-1 text-[13px] font-medium transition ${
+                v === size ? "border-forest bg-forest text-paper" : "border-line-2 bg-card/60 text-ink-2 hover:border-ink-2"
+              }`}
+            >
+              {frac(v)}×
+            </button>
+          ))}
+        </div>
+        {planSize && size !== planSize && (
+          <button type="button" onClick={() => setSize(planSize)} className="text-sm text-forest underline underline-offset-2">
+            Back to your plan&rsquo;s {frac(planSize)}×
+          </button>
+        )}
+      </div>
 
       {/* Cook */}
       <section className="mt-14 grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
@@ -280,10 +325,10 @@ export function RecipeView({ id, credit }: { id: string; credit?: { author: stri
             <div className="mt-4 grid grid-cols-4 gap-4 text-center">
               {(
                 [
-                  ["Energy", `${kcal(mi.n.kcal)}`, "kcal"],
-                  ["Protein", `${Math.round(mi.n.p)}`, "g"],
-                  ["Carbs", `${Math.round(mi.n.c)}`, "g"],
-                  ["Fat", `${Math.round(mi.n.f)}`, "g"],
+                  ["Energy", `${kcal(nn.kcal)}`, "kcal"],
+                  ["Protein", `${Math.round(nn.p)}`, "g"],
+                  ["Carbs", `${Math.round(nn.c)}`, "g"],
+                  ["Fat", `${Math.round(nn.f)}`, "g"],
                 ] as const
               ).map(([l, v, u]) => (
                 <div key={l}>
@@ -379,7 +424,7 @@ function AddToPlan({ open, onClose, mealId, onAdded }: { open: boolean; onClose:
   const meal = MEALS[mealId];
   if (!app?.profile) return null;
   const profile = app.profile;
-  const slots = meal.slots.filter((s) => activeSlots(profile).includes(s)) as Slot[];
+  const slots = availableSlots(profile).filter((s) => fitsSlot(meal, s)) as Slot[];
   const t = today();
   const days = Array.from({ length: 7 }, (_, i) => addDays(t, i));
 

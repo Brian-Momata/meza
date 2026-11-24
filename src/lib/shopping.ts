@@ -1,7 +1,7 @@
 import { AISLES, ingredient } from "./data/ingredients";
 import { MEALS } from "./data/meals";
 import { recipe } from "./data/recipes";
-import { activeSlots } from "./planner";
+import { daySlots } from "./planner";
 import type { Aisle, DayPlan, Ingredient, Profile, Recipe } from "./types";
 
 export interface ShopItem {
@@ -33,13 +33,13 @@ export function buildShoppingList(
   for (const date of dates) {
     const day = days[date];
     if (!day) continue;
-    for (const slot of activeSlots(profile)) {
+    for (const slot of daySlots(day)) {
       const pm = day[slot];
       const meal = pm && MEALS[pm.meal];
       if (!meal) continue;
       for (const part of meal.parts) {
         const r = recipe(part.recipe);
-        for (const line of scaleRecipe(r, profile.people * (part.qty ?? 1))) {
+        for (const line of scaleRecipe(r, profile.people * (part.qty ?? 1) * (pm!.scale ?? 1))) {
           const ing = ingredient(line.id);
           if (ing.aisle === "none") continue;
           const item = items.get(ing.id) ?? { ingredient: ing, grams: 0, uses: [] };

@@ -5,9 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { MEALS } from "@/lib/data/meals";
 import { addDays, dayNum, enDay, monthDay, rangeLabel, shortDay, swDay, today, weekDates, weekStart } from "@/lib/dates";
-import { kcal } from "@/lib/format";
-import { info } from "@/lib/nutrition";
-import { activeSlots, dayTotal, SLOT_META } from "@/lib/planner";
+import { kcal, portions, recipeHref } from "@/lib/format";
+import { daySlots, dayTotal, pmKcal, SLOT_META } from "@/lib/planner";
 import { reshuffleWeek, toggleLock, useApp } from "@/lib/store";
 import type { DayPlan, Profile, Slot } from "@/lib/types";
 import { usePlan } from "@/lib/use-plan";
@@ -39,9 +38,9 @@ export function PlanView() {
   const { app, profile } = plan;
   const t = today();
   const dates = weekDates(week);
-  const totals = dates.map((d) => dayTotal(app.days[d], profile)).filter(Boolean);
+  const totals = dates.map((d) => dayTotal(app.days[d])).filter(Boolean);
   const avg = totals.length ? totals.reduce((a, b) => a + b, 0) / totals.length : 0;
-  const mealCount = dates.reduce((n, d) => n + activeSlots(profile).filter((s) => app.days[d]?.[s]).length, 0);
+  const mealCount = dates.reduce((n, d) => n + daySlots(app.days[d]).length, 0);
   const title = offset === 0 ? "This week" : offset === 1 ? "Next week" : `Week of ${monthDay(week)}`;
 
   const shuffle = () => {
@@ -153,8 +152,8 @@ function DaySection({
   delay: number;
   onSwap: (s: Slot) => void;
 }) {
-  const slots = activeSlots(profile).filter((s) => day?.[s]);
-  const total = dayTotal(day, profile);
+  const slots = daySlots(day);
+  const total = dayTotal(day);
   const pct = Math.min(100, (total / profile.target) * 100);
   const near = Math.abs(total - profile.target) <= profile.target * 0.06;
   const prep = Object.values(tomorrow ?? {})
@@ -181,17 +180,16 @@ function DaySection({
         </div>
       </div>
 
-      <div className={`grid gap-3 md:gap-4 ${slots.length === 4 ? "md:grid-cols-4" : "md:grid-cols-3"} ${past ? "opacity-60" : ""}`}>
+      <div className={`grid gap-3 md:gap-4 ${slots.length >= 5 ? "md:grid-cols-5" : slots.length === 4 ? "md:grid-cols-4" : "md:grid-cols-3"} ${past ? "opacity-60" : ""}`}>
         {slots.map((s) => {
           const pm = day![s]!;
           const m = MEALS[pm.meal];
-          const n = info(pm.meal).n;
           return (
             <article
               key={s}
               className="group flex items-center gap-4 rounded-[20px] border border-line bg-card p-2.5 pr-3 transition hover:border-line-2 md:flex-col md:items-stretch md:gap-0 md:p-0"
             >
-              <Link href={`/recipes/${m.id}`} className="shrink-0 overflow-hidden rounded-[14px] md:rounded-none">
+              <Link href={recipeHref(m.id, pm.scale)} className="shrink-0 overflow-hidden rounded-[14px] md:rounded-none">
                 <MealPhoto
                   id={m.id}
                   sizes="(min-width: 768px) 280px, 80px"
@@ -204,11 +202,14 @@ function DaySection({
                   {SLOT_META[s].name}
                   {pm.eaten && <span className="ml-1 text-forest">· eaten</span>}
                 </div>
-                <Link href={`/recipes/${m.id}`} className="mt-1 line-clamp-2 text-[15px] font-medium leading-snug text-ink hover:text-forest">
+                <Link href={recipeHref(m.id, pm.scale)} className="mt-1 line-clamp-2 text-[15px] font-medium leading-snug text-ink hover:text-forest">
                   {m.name}
                 </Link>
                 <div className="mt-auto flex items-center justify-between gap-2 pt-1.5 md:pt-3">
-                  <span className="tnum text-[13px] text-muted">{kcal(n.kcal)} kcal</span>
+                  <span className="tnum text-[13px] text-muted">
+                    {kcal(pmKcal(pm))} kcal
+                    {pm.scale && pm.scale !== 1 && <span className="text-[#7a5410]"> · {portions(pm.scale)}</span>}
+                  </span>
                   {!past && (
                     <span className="flex items-center">
                       <button

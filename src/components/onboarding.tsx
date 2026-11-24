@@ -8,7 +8,7 @@ import { saveProfile, useApp } from "@/lib/store";
 import { joinHousehold } from "@/lib/sync";
 import type { Profile } from "@/lib/types";
 import { Logo } from "./logo";
-import { DEFAULT_PROFILE, DietField, HabitsField, PeopleField, TargetField } from "./profile-fields";
+import { DEFAULT_PROFILE, DietField, HabitsField, MealsField, PeopleField, TargetField } from "./profile-fields";
 
 const STEPS = [
   {
@@ -20,6 +20,11 @@ const STEPS = [
     eyebrow: "Your goal",
     title: "How much energy does each person need?",
     body: "We pick meals that land close to this every day, and size every portion to match.",
+  },
+  {
+    eyebrow: "Your day",
+    title: "How many meals do you eat a day?",
+    body: "Skip breakfast, skip lunch, or eat once a day. We'll still hit your goal.",
   },
   {
     eyebrow: "Your kitchen",
@@ -162,7 +167,8 @@ export function Onboarding() {
             <div className="mt-8">
               {step === 0 && <PeopleField profile={profile} set={set} />}
               {step === 1 && <TargetField profile={profile} set={set} />}
-              {step === 2 && (
+              {step === 2 && <MealsField profile={profile} set={set} />}
+              {step === 3 && (
                 <div className="space-y-8">
                   <DietField profile={profile} set={set} />
                   <HabitsField profile={profile} set={set} />

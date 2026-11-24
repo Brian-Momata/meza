@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { MEALS } from "@/lib/data/meals";
 import { addDays, enDay, monthDay, swDay, today, weekDates, weekStart } from "@/lib/dates";
-import { buy, duration, kcal } from "@/lib/format";
+import { buy, duration, kcal, portions, recipeHref } from "@/lib/format";
 import { info } from "@/lib/nutrition";
-import { activeSlots, dayTotal, SLOT_META } from "@/lib/planner";
+import { daySlots, dayTotal, isSnack, pmKcal, SLOT_META } from "@/lib/planner";
 import { buildShoppingList } from "@/lib/shopping";
 import { toggleEaten } from "@/lib/store";
 import type { DayPlan, Profile, Slot } from "@/lib/types";
@@ -15,7 +15,7 @@ import { usePlan } from "@/lib/use-plan";
 import { SwapSheet } from "./swap-sheet";
 import { Kcal, MealPhoto, MobileTopBar, Skeleton } from "./ui";
 
-const SLOT_HOUR: Record<Slot, number> = { breakfast: 7, snack: 10, lunch: 13, supper: 19.5 };
+const SLOT_HOUR: Record<Slot, number> = { breakfast: 7, snack: 10, lunch: 13, snack2: 16, supper: 19.5 };
 
 function greeting(h: number) {
   if (h < 12) return "Habari ya asubuhi";
@@ -31,19 +31,19 @@ export function TodayView() {
   const { app, profile } = plan;
   const t = today();
   const day = app.days[t] ?? {};
-  const slots = activeSlots(profile).filter((s) => day[s]);
+  const slots = daySlots(day);
   const now = new Date();
   const hour = now.getHours() + now.getMinutes() / 60;
 
   let featured: { date: string; slot: Slot; label: string } | null = null;
-  const nextSlot = slots.filter((s) => s !== "snack").find((s) => !day[s]?.eaten && SLOT_HOUR[s] + 1.5 > hour);
+  const nextSlot = slots.filter((s) => !isSnack(s)).find((s) => !day[s]?.eaten && SLOT_HOUR[s] + 1.5 > hour);
   if (nextSlot) featured = { date: t, slot: nextSlot, label: `Up next · ${SLOT_META[nextSlot].name} · ${SLOT_META[nextSlot].time}` };
   else {
     const tmr = addDays(t, 1);
     if (app.days[tmr]?.breakfast) featured = { date: tmr, slot: "breakfast", label: "Tomorrow · Breakfast" };
   }
 
-  const total = dayTotal(day, profile);
+  const total = dayTotal(day);
 
   return (
     <main className="mx-auto max-w-[1180px] px-5 pb-32 sm:px-8 lg:px-12 lg:pb-20">
@@ -77,6 +77,7 @@ export function TodayView() {
               label={featured.label}
               mealId={app.days[featured.date]![featured.slot]!.meal}
               eaten={!!app.days[featured.date]![featured.slot]!.eaten}
+              scale={app.days[featured.date]![featured.slot]!.scale ?? 1}
               people={profile.people}
               onSwap={() => setSwap({ date: featured!.date, slot: featured!.slot })}
             />
@@ -88,7 +89,7 @@ export function TodayView() {
           <EnergyCard day={day} slots={slots} profile={profile} />
           <PrepCard date={addDays(t, 1)} day={app.days[addDays(t, 1)]} />
           <MarketCard profile={profile} days={app.days} checked={app.checked} />
-          <TomorrowCard date={addDays(t, 1)} day={app.days[addDays(t, 1)]} profile={profile} />
+          <TomorrowCard date={addDays(t, 1)} day={app.days[addDays(t, 1)]} />
         </aside>
       </div>
 
@@ -104,6 +105,7 @@ function Featured({
   mealId,
   eaten,
   people,
+  scale,
   onSwap,
 }: {
   date: string;
@@ -112,13 +114,15 @@ function Featured({
   mealId: string;
   eaten: boolean;
   people: number;
+  scale: number;
   onSwap: () => void;
 }) {
   const meal = MEALS[mealId];
   const i = info(mealId);
+  const href = recipeHref(mealId, scale);
   return (
     <article className="animate-rise overflow-hidden rounded-[28px] border border-line bg-card shadow-[0_30px_60px_-40px_rgba(60,40,10,.35)] [animation-delay:80ms]">
-      <Link href={`/recipes/${mealId}`} className="group relative block">
+      <Link href={href} className="group relative block">
         <MealPhoto id={mealId} sizes="(min-width: 1024px) 680px, 100vw" priority className="aspect-[5/4] transition-transform duration-700 group-hover:scale-[1.015] sm:aspect-[16/10]" />
         <span className="absolute left-4 top-4 rounded-full bg-paper/90 px-3 py-1.5 text-xs font-semibold text-ink backdrop-blur">
           <span className="mr-1.5 inline-block size-2 rounded-full align-middle" style={{ background: SLOT_META[slot].color }} />
@@ -134,13 +138,13 @@ function Featured({
           <div>
             <dt className="eyebrow text-muted">Per person</dt>
             <dd className="font-display mt-1.5 text-2xl">
-              <Kcal value={i.n.kcal} />
+              <Kcal value={i.n.kcal * scale} />
             </dd>
           </div>
           <div>
             <dt className="eyebrow text-muted">Protein</dt>
             <dd className="tnum font-display mt-1.5 text-2xl">
-              {Math.round(i.n.p)}
+              {Math.round(i.n.p * scale)}
               <span className="text-[0.78em] text-muted"> g</span>
             </dd>
           </div>
@@ -151,11 +155,11 @@ function Featured({
         </dl>
 
         <div className="mt-5">
-          <div className="eyebrow text-muted">Each plate</div>
+          <div className="eyebrow text-muted">Each plate{scale !== 1 && <span className="ml-2 rounded-full bg-maize-soft px-2 py-0.5 normal-case tracking-normal text-[#7a5410]">{portions(scale)}</span>}</div>
           <ul className="mt-2.5 flex flex-wrap gap-2">
             {i.plate.map((p) => (
               <li key={p.recipe.id} className="rounded-full bg-paper-2 px-3 py-1.5 text-[13px] text-ink-2">
-                <span className="font-medium text-ink">{p.recipe.name}</span> · <span className="tnum">{Math.round(p.grams / 5) * 5} g</span>
+                <span className="font-medium text-ink">{p.recipe.name}</span> · <span className="tnum">{Math.round((p.grams * scale) / 5) * 5} g</span>
               </li>
             ))}
           </ul>
@@ -163,7 +167,7 @@ function Featured({
 
         <div className="mt-7 flex flex-wrap items-center gap-3">
           <Link
-            href={`/recipes/${mealId}`}
+            href={href}
             className="inline-flex items-center gap-2 rounded-full bg-forest px-5 py-3 text-[15px] font-medium text-paper transition hover:bg-forest-2"
           >
             Cook for {people} <ArrowRight className="size-4" />
@@ -218,7 +222,7 @@ function DayLedger({
         {slots.map((s) => {
           const pm = day[s]!;
           const m = MEALS[pm.meal];
-          const i = info(pm.meal);
+          const scale = pm.scale ?? 1;
           const isNext = featured?.date === date && featured.slot === s;
           return (
             <li key={s} className={`flex items-center gap-4 border-b border-line py-4 transition-opacity ${pm.eaten ? "opacity-55" : ""}`}>
@@ -229,7 +233,7 @@ function DayLedger({
                   {SLOT_META[s].name}
                 </div>
               </div>
-              <Link href={`/recipes/${m.id}`} className="group flex min-w-0 flex-1 items-center gap-4">
+              <Link href={recipeHref(m.id, pm.scale)} className="group flex min-w-0 flex-1 items-center gap-4">
                 <MealPhoto id={m.id} sizes="72px" className="size-[60px] shrink-0 rounded-2xl sm:size-[72px]" />
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -237,7 +241,13 @@ function DayLedger({
                     {isNext && <span className="hidden shrink-0 rounded-full bg-maize-soft px-2 py-0.5 text-[11px] font-semibold text-[#7a5410] sm:inline">Next</span>}
                   </div>
                   <div className="tnum mt-0.5 flex items-center gap-2 text-[13px] text-muted">
-                    <span>{kcal(i.n.kcal)} kcal</span>
+                    <span>{kcal(pmKcal(pm))} kcal</span>
+                    {scale !== 1 && (
+                      <>
+                        <span className="text-line-2">·</span>
+                        <span className="text-[#7a5410]">{portions(scale)}</span>
+                      </>
+                    )}
                     <span className="text-line-2">·</span>
                     <span className="inline-flex items-center gap-1">
                       <Clock className="size-3" /> {duration(m.minutes)}
@@ -278,7 +288,11 @@ function DayLedger({
 }
 
 function EnergyCard({ day, slots, profile }: { day: DayPlan; slots: Slot[]; profile: Profile }) {
-  const parts = slots.map((s) => ({ s, n: info(day[s]!.meal).n, eaten: !!day[s]!.eaten }));
+  const parts = slots.map((s) => {
+    const n = info(day[s]!.meal).n;
+    const k = day[s]!.scale ?? 1;
+    return { s, n: { kcal: n.kcal * k, p: n.p * k, c: n.c * k, f: n.f * k }, eaten: !!day[s]!.eaten };
+  });
   const total = parts.reduce((a, p) => a + p.n.kcal, 0);
   const eaten = parts.filter((p) => p.eaten).reduce((a, p) => a + p.n.kcal, 0);
   const scale = Math.max(total, profile.target);
@@ -416,19 +430,19 @@ function MarketCard({
   );
 }
 
-function TomorrowCard({ date, day, profile }: { date: string; day: DayPlan | undefined; profile: Profile }) {
+function TomorrowCard({ date, day }: { date: string; day: DayPlan | undefined }) {
   if (!day) return null;
-  const slots = activeSlots(profile).filter((s) => day[s]);
+  const slots = daySlots(day);
   return (
     <section className="animate-rise rounded-[24px] border border-line p-6 [animation-delay:260ms]">
       <div className="flex items-baseline justify-between">
         <span className="eyebrow text-muted">Kesho · {enDay(date)}</span>
-        <span className="tnum text-sm text-muted">{kcal(dayTotal(day, profile))} kcal</span>
+        <span className="tnum text-sm text-muted">{kcal(dayTotal(day))} kcal</span>
       </div>
       <ul className="mt-4 space-y-3">
         {slots.map((s) => (
           <li key={s}>
-            <Link href={`/recipes/${day[s]!.meal}`} className="group flex items-center gap-3">
+            <Link href={recipeHref(day[s]!.meal, day[s]!.scale)} className="group flex items-center gap-3">
               <MealPhoto id={day[s]!.meal} sizes="44px" className="size-11 shrink-0 rounded-xl" />
               <span className="min-w-0">
                 <span className="block text-xs text-muted">{SLOT_META[s].name}</span>

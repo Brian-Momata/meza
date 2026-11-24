@@ -33,7 +33,8 @@ const WORDS = [
 
 export const CODE_RE = /^[A-Z]{3,10}-[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{6}$/;
 const FIELD_RE = /^(profile|d:\d{4}-\d{2}-\d{2}|c:[a-z0-9-]{1,40})$/;
-const SLOTS = new Set(["breakfast", "snack", "lunch", "supper"]);
+const SLOTS = new Set(["breakfast", "snack", "lunch", "snack2", "supper"]);
+const MAINS = new Set(["breakfast", "lunch", "supper"]);
 const KINDS = new Set(["beef", "goat", "chicken", "fish", "egg", "dairy"]);
 
 const key = (code: string) => `household:${code}`;
@@ -63,7 +64,10 @@ function validValue(field: string, value: unknown): boolean {
       ["all", "pescatarian", "vegetarian"].includes(p.diet as string) &&
       Array.isArray(p.avoid) && p.avoid.every((k) => KINDS.has(k as string)) &&
       typeof p.snacks === "boolean" &&
-      typeof p.quickWeekdays === "boolean"
+      typeof p.quickWeekdays === "boolean" &&
+      (p.meals === undefined ||
+        (Array.isArray(p.meals) && p.meals.length >= 1 && p.meals.length <= 3 && p.meals.every((m) => MAINS.has(m as string)))) &&
+      (p.fill === undefined || p.fill === "portions" || p.fill === "snacks")
     );
   }
   // A day: { breakfast?: { meal, locked?, eaten? }, ... }
@@ -75,6 +79,7 @@ function validValue(field: string, value: unknown): boolean {
       !!m && typeof m === "object" &&
       typeof m.meal === "string" && !!MEALS[m.meal] &&
       (m.locked === undefined || typeof m.locked === "boolean") &&
+      (m.scale === undefined || (typeof m.scale === "number" && m.scale >= 0.5 && m.scale <= 2.5)) &&
       (m.eaten === undefined || typeof m.eaten === "boolean")
     );
   });

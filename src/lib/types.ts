@@ -1,4 +1,7 @@
-export type Slot = "breakfast" | "snack" | "lunch" | "supper";
+export type Slot = "breakfast" | "snack" | "lunch" | "snack2" | "supper";
+export type MainSlot = "breakfast" | "lunch" | "supper";
+/** How to reach the calorie goal when the meals alone fall short. */
+export type Fill = "portions" | "snacks";
 
 /** Where in a Kenyan shopping trip an ingredient is bought. */
 export type Aisle = "mboga" | "nyama" | "samaki" | "duka" | "maziwa" | "viungo" | "none";
@@ -106,10 +109,15 @@ export interface Profile {
   avoid: Kind[];
   snacks: boolean;
   quickWeekdays: boolean;
+  /** Which main meals this household eats. Missing means all three. */
+  meals?: MainSlot[];
+  fill?: Fill;
 }
 
 export interface PlannedMeal {
   meal: string;
+  /** Portion multiplier per person (1 = the recipe's standard plate). */
+  scale?: number;
   locked?: boolean;
   eaten?: boolean;
 }

@@ -141,6 +141,16 @@ export function buy(ingOrId: Ingredient | string, g: number): Amount {
   return { main: grams(Math.ceil(g / step) * step) };
 }
 
+/** "1½ portions", "¾ portion": how big a plate is relative to the standard. */
+export function portions(scale: number) {
+  return `${frac(scale)} ${scale > 1 ? "portions" : "portion"}`;
+}
+
+/** Link to a recipe at the plate size the plan uses. */
+export function recipeHref(id: string, scale?: number) {
+  return scale && scale !== 1 ? `/recipes/${id}?p=${scale}` : `/recipes/${id}`;
+}
+
 export function kcal(n: number) {
   return Math.round(n).toLocaleString("en-KE");
 }

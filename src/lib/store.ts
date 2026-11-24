@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { MEALS } from "./data/meals";
 import { today, weekDates, weekStart } from "./dates";
-import { planDays } from "./planner";
+import { planDays, withScales } from "./planner";
 import type { AppState, DayPlan, Profile, Slot } from "./types";
 
 const KEY = "meza:v1";
@@ -157,10 +157,11 @@ export function reshuffleWeek(start: string) {
 }
 
 export function setMeal(date: string, slot: Slot, mealId: string) {
-  update((s) => ({
-    ...s,
-    days: { ...s.days, [date]: { ...s.days[date], [slot]: { meal: mealId, locked: true } } },
-  }));
+  update((s) => {
+    const day: DayPlan = { ...s.days[date], [slot]: { meal: mealId, locked: true } };
+    // Re-size the day's plates so it still lands on the goal.
+    return { ...s, days: { ...s.days, [date]: s.profile ? withScales(day, s.profile) : day } };
+  });
 }
 
 export function toggleLock(date: string, slot: Slot) {

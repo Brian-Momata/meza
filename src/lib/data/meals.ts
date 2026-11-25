@@ -35,7 +35,6 @@ const list: Meal[] = [
     region: "Central",
     minutes: 40,
     budget: true,
-    focus: "50% 60%",
     order: "Boil the arrowroots and sweet potatoes in separate pots. Arrowroots take about ten minutes longer. Make chai at the end.",
   },
   {
@@ -58,7 +57,6 @@ const list: Meal[] = [
     parts: [{ recipe: "mayai-chemsha" }, { recipe: "ngwaci" }, { recipe: "chai" }],
     region: "Countrywide",
     minutes: 30,
-    focus: "50% 70%",
   },
   {
     id: "mbaazi-mahamri",
@@ -106,7 +104,6 @@ const list: Meal[] = [
     parts: [{ recipe: "ugali" }, { recipe: "sukuma" }, { recipe: "beef-stew" }],
     region: "Countrywide",
     minutes: 75,
-    focus: "50% 55%",
     order: "Start the stew first. Cook the sukuma while the ugali firms up, and turn the ugali out last so it's steaming.",
   },
   {
@@ -317,7 +314,6 @@ const list: Meal[] = [
     parts: [{ recipe: "chai" }, { recipe: "mandazi" }],
     region: "Countrywide",
     minutes: 10,
-    focus: "50% 35%",
   },
   {
     id: "mahindi-choma",

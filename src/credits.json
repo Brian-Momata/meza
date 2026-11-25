@@ -1,57 +1,57 @@
 {
   "chai-mandazi": {
-    "title": "Tea and mandazi.jpg",
-    "author": "Kengee8",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Tea_and_mandazi.jpg",
+    "title": "Plate of African mandazi on wooden table",
+    "author": "Maximiliana Eligi Mtenga",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "https://www.pexels.com/photo/plate-of-african-mandazi-on-wooden-table-36675787/",
     "w": 1050,
     "h": 1400
   },
   "uji-ngwaci": {
-    "title": "Uji Power.jpg",
-    "author": "Monk Waltesart",
-    "license": "CC BY 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Uji_Power.jpg",
-    "w": 1280,
-    "h": 1239
+    "title": "A bowl of food sitting on top of a table",
+    "author": "Mari Helin",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "source": "https://unsplash.com/photos/a-bowl-of-food-sitting-on-top-of-a-table-EB5tXJPno4c",
+    "w": 1237,
+    "h": 1400
   },
   "nduma-ngwaci-chai": {
-    "title": "Kenyan breakfast 2.jpg",
-    "author": "Roxanne.heston",
-    "license": "CC0",
-    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "source": "https://commons.wikimedia.org/wiki/File:Kenyan_breakfast_2.jpg",
+    "title": "A pile of pink and yellow sweet potatoes",
+    "author": "Glen Hayoge",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "source": "https://unsplash.com/photos/a-pile-of-pink-and-yellow-sweet-potatoes-k0MigzUz-vI",
     "w": 1400,
-    "h": 1050
+    "h": 788
   },
   "mayai-mkate-chai": {
-    "title": "Kenyan breakfast, Qaffee Spot, 2025 (01).jpg",
-    "author": "Bahnfrend",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Kenyan_breakfast,_Qaffee_Spot,_2025_(01).jpg",
-    "w": 1400,
-    "h": 934
+    "title": "A white plate topped with eggs and toast",
+    "author": "Krisztina Papp",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "source": "https://unsplash.com/photos/a-white-plate-topped-with-eggs-and-toast-wIOBD2k3agQ",
+    "w": 1050,
+    "h": 1400
   },
   "mayai-ngwaci-chai": {
-    "title": "Boiled eggs with tomatoes for breakfast.jpg",
-    "author": "Ms Kabintie",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Boiled_eggs_with_tomatoes_for_breakfast.jpg",
+    "title": "Two sliced boiled eggs",
+    "author": "Faris Mohammed",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "source": "https://unsplash.com/photos/two-sliced-boiled-eggs-pVO700FnVH8",
     "w": 1050,
     "h": 1400
   },
   "mbaazi-mahamri": {
-    "title": "Mbaazi na mahamri - Kenyan coastal cuisine.jpg",
-    "author": "Chief kairu",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Mbaazi_na_mahamri_-_Kenyan_coastal_cuisine.jpg",
-    "w": 1400,
-    "h": 1050
+    "title": "Chana masala with fried bhatura bread",
+    "author": "Zoshua Colah",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "source": "https://unsplash.com/photos/chana-masala-with-fried-bhatura-bread-Idh9dnG2v8w",
+    "w": 1050,
+    "h": 1400
   },
   "chapati-chai": {
     "title": "Chapati kenya.jpg",
@@ -63,21 +63,21 @@
     "h": 933
   },
   "ndizi-chai": {
-    "title": "Boiled bananas garnished with spring onions served for breakfast among the Luhya people of Kenya.jpg",
-    "author": "Cynthia Doresi",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Boiled_bananas_garnished_with_spring_onions_served_for_breakfast_among_the_Luhya_people_of_Kenya.jpg",
-    "w": 1400,
-    "h": 933
+    "title": "Green banana fruits",
+    "author": "Felipe Vieira",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "source": "https://unsplash.com/photos/green-banana-fruits-RXnLDj2WBgY",
+    "w": 933,
+    "h": 1400
   },
   "ugali-sukuma-nyama": {
-    "title": "Ugali beef stew with sukuma n fresh tomatoes taken in Nanyuki, Kenya.jpg",
-    "author": "E4snave",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Ugali_beef_stew_with_sukuma_n_fresh_tomatoes_taken_in_Nanyuki,_Kenya.jpg",
-    "w": 786,
+    "title": "Cooked food in white ceramic bowl",
+    "author": "Nathan Dumlao",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "source": "https://unsplash.com/photos/cooked-food-in-white-ceramic-bowl-gbtQfadV5qY",
+    "w": 934,
     "h": 1400
   },
   "pilau-kachumbari": {
@@ -99,13 +99,13 @@
     "h": 1400
   },
   "mukimo-nyama": {
-    "title": "Mukimo & Beef Stew.jpg",
-    "author": "Anitah Pezz",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Mukimo_%26_Beef_Stew.jpg",
-    "w": 700,
-    "h": 1400
+    "title": "A bowl of beef with brown sauce on a wooden surface",
+    "author": "SpotwizardLee",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "https://www.pexels.com/photo/a-bowl-of-beed-with-brown-sauce-on-a-wooden-surface-8743085/",
+    "w": 1400,
+    "h": 927
   },
   "matoke-kuku": {
     "title": "Matoke and Chicken.jpg",
@@ -117,13 +117,13 @@
     "h": 1400
   },
   "tilapia-ugali": {
-    "title": "Fried Tilapia, Ugali, Sukuma Wiki and Kachumbari (From Kisumu).JPG",
-    "author": "Napendakukula",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Fried_Tilapia,_Ugali,_Sukuma_Wiki_and_Kachumbari_(From_Kisumu).JPG",
+    "title": "Cooked stew fish on cooking pot",
+    "author": "Jenn Kosar",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "source": "https://unsplash.com/photos/cooked-stew-fish-on-cooking-pot-o6wErKlvxS4",
     "w": 1400,
-    "h": 1050
+    "h": 1110
   },
   "omena-ugali": {
     "title": "Meal of Omena, Vegetables and Ugali.jpg",
@@ -180,21 +180,21 @@
     "h": 933
   },
   "samaki-nazi-wali": {
-    "title": "Fish in coconut curry.jpg",
-    "author": "Anupamasadasivan",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Fish_in_coconut_curry.jpg",
+    "title": "Fish curry with rice, lime, and nuts",
+    "author": "Diego Arenas de Rodrigo",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "source": "https://unsplash.com/photos/fish-curry-with-rice-lime-and-nuts-7v9U94719TE",
     "w": 1400,
-    "h": 939
+    "h": 935
   },
   "wali-maharagwe": {
-    "title": "Rice and Beans in a pot.jpg",
-    "author": "Zahraswaty",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Rice_and_Beans_in_a_pot.jpg",
-    "w": 630,
+    "title": "Cooked rice with vegetables on white ceramic plate",
+    "author": "I Own My Food Art",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "https://www.pexels.com/photo/cooked-rice-with-vegetables-on-white-ceramic-plate-8992843/",
+    "w": 1400,
     "h": 1400
   },
   "ugali-managu-mala": {
@@ -207,13 +207,13 @@
     "h": 1400
   },
   "chapati-nyama": {
-    "title": "Kenyan food-chapati with beef stew.jpg",
-    "author": "Queen Asali",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Kenyan_food-chapati_with_beef_stew.jpg",
+    "title": "Cooked food on white ceramic bowl",
+    "author": "Yang Hao",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "https://www.pexels.com/photo/cooked-food-on-white-ceramic-bowl-10692537/",
     "w": 1400,
-    "h": 647
+    "h": 934
   },
   "ugali-sukuma-mayai": {
     "title": "Ugali & Sukuma Wiki.jpg",
@@ -234,30 +234,30 @@
     "h": 1226
   },
   "mahindi-choma": {
-    "title": "Roasted Maize Kenya Village.jpg",
-    "author": "Gitonga Mutua",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:Roasted_Maize_Kenya_Village.jpg",
-    "w": 1047,
+    "title": "A charred ear of corn resting on green husks",
+    "author": "Hasan Ünal",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "source": "https://unsplash.com/photos/charred-corn-on-green-husks-LpApmtFlCNQ",
+    "w": 985,
     "h": 1400
   },
   "njugu": {
-    "title": "Roasted Groundnuts.jpg",
-    "author": "Nana Pearls",
-    "license": "CC0",
-    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "source": "https://commons.wikimedia.org/wiki/File:Roasted_Groundnuts.jpg",
+    "title": "Bunch of brown peanuts",
+    "author": "Isai Dzib",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "source": "https://unsplash.com/photos/bunch-of-brown-peanuts-TysS85XkjgI",
     "w": 1400,
-    "h": 1400
+    "h": 934
   },
   "chai-saa-nne": {
-    "title": "The Kenyan Chai.jpg",
-    "author": "Mikkilynx",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "source": "https://commons.wikimedia.org/wiki/File:The_Kenyan_Chai.jpg",
-    "w": 1032,
+    "title": "Authentic Indian masala chai glass close-up",
+    "author": "vishranthanadka7",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "https://www.pexels.com/photo/authentic-indian-masala-chai-glass-close-up-37186989/",
+    "w": 956,
     "h": 1400
   },
   "embe-ndizi": {
@@ -270,12 +270,12 @@
     "h": 1016
   },
   "hero-spread": {
-    "title": "Kenyan meal.jpg",
-    "author": "Roxanne.heston",
-    "license": "CC0",
-    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "source": "https://commons.wikimedia.org/wiki/File:Kenyan_meal.jpg",
+    "title": "Traditional Burundian meal with ugali and beans",
+    "author": "Lionel Ntasano",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "https://www.pexels.com/photo/traditional-burundian-meal-with-ugali-and-beans-37100094/",
     "w": 1400,
-    "h": 1050
+    "h": 1176
   }
 }

@@ -65,7 +65,7 @@ export function Onboarding() {
     <div className="min-h-dvh lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
       {/* Photo panel */}
       <div className="relative h-[42dvh] min-h-[320px] overflow-hidden bg-forest lg:sticky lg:top-0 lg:h-dvh">
-        <Image src="/meals/hero-spread.jpg" alt="A Kenyan table: chapati, tilapia, ugali, greens and stews" fill priority sizes="(min-width:1024px) 50vw, 100vw" className="photo object-cover" />
+        <Image src="/meals/hero-spread.jpg" alt="An East African table: ugali of white, millet and sorghum flour, fish stew and beans" fill priority sizes="(min-width:1024px) 50vw, 100vw" className="photo object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/10 to-ink/80" />
         <div className="absolute inset-x-0 top-0 p-6 sm:p-10">
           <Logo tone="light" size={34} />

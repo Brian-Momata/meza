@@ -14,7 +14,7 @@ export default function Page() {
     <main className="mx-auto max-w-4xl px-5 pb-32 sm:px-8 lg:px-12">
       <MobileTopBar />
       <PageHeader eyebrow="Asante" title="Photo credits">
-        Every photo in Meza is real Kenyan food, shared by its photographer on Wikimedia Commons under an open licence. Thank you.
+        Every photo in Meza was shared by its photographer under an open licence, on Wikimedia Commons, Unsplash or Pexels. Thank you.
       </PageHeader>
       <ul className="divide-y divide-line border-y border-line">
         {entries.map(([id, c]) => (

@@ -6,7 +6,7 @@ import { Fragment, useMemo, useState, useSyncExternalStore } from "react";
 import { ingredient } from "@/lib/data/ingredients";
 import { MEAL_LIST, MEALS } from "@/lib/data/meals";
 import { addDays, enDay, monthDay, today } from "@/lib/dates";
-import { amount, duration, frac, inline, kcal } from "@/lib/format";
+import { amount, duration, frac, inline, kcal, ksh } from "@/lib/format";
 import { info, type PlatePart } from "@/lib/nutrition";
 import { availableSlots, fitsSlot, SLOT_META } from "@/lib/planner";
 import { scaleRecipe } from "@/lib/shopping";
@@ -124,10 +124,11 @@ export function RecipeView({ id, credit }: { id: string; credit?: { author: stri
           <h1 className="font-display mt-3 text-[40px] leading-[1.02] sm:text-[54px]">{meal.name}</h1>
           <p className="mt-2 text-lg text-ink-2">{meal.sw}</p>
           <p className="mt-5 max-w-[52ch] text-[15px] leading-relaxed text-ink-2">{meal.blurb}</p>
-          <dl className="mt-7 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line bg-line">
+          <dl className="mt-7 grid grid-cols-2 gap-px sm:grid-cols-4 overflow-hidden rounded-2xl border border-line bg-line">
             {[
               { label: "Per person", value: <Kcal value={nn.kcal} /> },
               { label: "Protein", value: <span className="tnum">{Math.round(nn.p)} g</span> },
+              { label: "Cost each", value: <span className="tnum">{ksh(mi.kes * size)}</span> },
               { label: "Total time", value: duration(meal.minutes) },
             ].map(({ label, value }) => (
               <div key={label} className="bg-card px-4 py-4">

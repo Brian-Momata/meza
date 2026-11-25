@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { MEALS } from "@/lib/data/meals";
 import { addDays, enDay, monthDay, swDay, today, weekDates, weekStart } from "@/lib/dates";
-import { buy, duration, kcal, portions, recipeHref } from "@/lib/format";
+import { buy, duration, kcal, ksh, portions, recipeHref } from "@/lib/format";
 import { info } from "@/lib/nutrition";
-import { daySlots, dayTotal, isSnack, pmKcal, SLOT_META } from "@/lib/planner";
+import { dailyBudget, daySlots, dayTotal, hasBudget, householdDayCost, isSnack, pmCost, pmKcal, SLOT_META } from "@/lib/planner";
 import { buildShoppingList } from "@/lib/shopping";
 import { toggleEaten } from "@/lib/store";
 import type { DayPlan, Profile, Slot } from "@/lib/types";
@@ -64,7 +64,9 @@ export function TodayView() {
         <h1 className="font-display mt-3 text-[44px] leading-[0.98] text-ink sm:text-[64px]">Leo tunakula nini?</h1>
         <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-ink-2 sm:text-base">
           {greeting(hour)}. Today is decided: {slots.length} meals for your table of {profile.people}, about{" "}
-          <span className="tnum font-medium text-ink">{kcal(total)} kcal</span> each.
+          <span className="tnum font-medium text-ink">{kcal(total)} kcal</span> each, for about{" "}
+          <span className="tnum font-medium text-ink">{ksh(householdDayCost(day, profile))}</span>
+          {hasBudget(profile) && <> against a day&rsquo;s share of {ksh(dailyBudget(profile) * profile.people)}</>}.
         </p>
       </header>
 
@@ -242,6 +244,8 @@ function DayLedger({
                   </div>
                   <div className="tnum mt-0.5 flex items-center gap-2 text-[13px] text-muted">
                     <span>{kcal(pmKcal(pm))} kcal</span>
+                    <span className="text-line-2">·</span>
+                    <span>{ksh(pmCost(pm) * profile.people)}</span>
                     {scale !== 1 && (
                       <>
                         <span className="text-line-2">·</span>

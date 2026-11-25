@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { kcal } from "@/lib/format";
+import { kcal, ksh } from "@/lib/format";
 import { mealsOf } from "@/lib/planner";
 import type { Diet, Fill, Kind, MainSlot, Profile } from "@/lib/types";
 import { Chip, Stepper, Toggle } from "./ui";
@@ -92,6 +92,96 @@ export function TargetField({ profile, set }: { profile: Profile; set: Set }) {
           </button>
         </span>
       </div>
+    </div>
+  );
+}
+
+/** Budget tiers, in KSh per person per day. */
+const BUDGETS = [
+  { pp: 150, name: "Tight", hint: "Githeri, ndengu, beans, ugali and greens. Little meat." },
+  { pp: 250, name: "Modest", hint: "Mostly pulses and greens, with chicken or beef a few times a week." },
+  { pp: 400, name: "Comfortable", hint: "Room for nyama, fish and pilau most days." },
+];
+
+/** A tier's weekly total for this household, rounded to KSh 100. */
+const weekly = (pp: number, people: number) => Math.round((pp * 7 * people) / 100) * 100;
+
+export function BudgetField({ profile, set }: { profile: Profile; set: Set }) {
+  const presets = BUDGETS.map((b) => ({ ...b, week: weekly(b.pp, profile.people) }));
+  const none = !profile.budget;
+  const custom = !none && !presets.some((b) => b.week === profile.budget);
+  const card = (on: boolean) =>
+    `flex items-center gap-4 rounded-2xl border px-5 py-4 text-left transition ${
+      on ? "border-forest bg-card shadow-[0_0_0_1px_var(--color-forest)]" : "border-line-2 bg-card/50 hover:border-ink-2"
+    }`;
+  const dot = (on: boolean) => (
+    <span className={`grid size-5 shrink-0 place-items-center rounded-full border ${on ? "border-forest bg-forest text-paper" : "border-line-2"}`}>
+      {on && <Check className="size-3" strokeWidth={3} />}
+    </span>
+  );
+  const step = profile.people * 7 * 25; // KSh 25 per person a day
+  const adjust = (dir: 1 | -1) => {
+    const cur = profile.budget ?? weekly(250, profile.people);
+    set({ budget: Math.max(step, Math.round((cur + dir * step) / 50) * 50) });
+  };
+  return (
+    <div>
+      <div className="grid gap-3">
+        {presets.map((b) => {
+          const on = profile.budget === b.week;
+          return (
+            <button key={b.name} type="button" onClick={() => set({ budget: b.week })} aria-pressed={on} className={card(on)}>
+              {dot(on)}
+              <span className="flex-1">
+                <span className="block text-[15px] font-medium">{b.name}</span>
+                <span className="block text-sm text-muted">{b.hint}</span>
+              </span>
+              <span className="text-right">
+                <span className="font-display tnum block text-xl">{ksh(b.week)}</span>
+                <span className="tnum block text-xs text-muted">a week</span>
+              </span>
+            </button>
+          );
+        })}
+        <button type="button" onClick={() => set({ budget: undefined })} aria-pressed={none} className={card(none)}>
+          {dot(none)}
+          <span className="flex-1">
+            <span className="block text-[15px] font-medium">No limit</span>
+            <span className="block text-sm text-muted">Plan for taste and variety, whatever it costs</span>
+          </span>
+        </button>
+      </div>
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-dashed border-line-2 px-5 py-4">
+        <span>
+          <span className="block text-[15px] font-medium">{custom ? "Your own budget" : "A different amount?"}</span>
+          <span className="block text-sm text-muted">
+            {none ? "Set exactly what you spend a week" : `About ${ksh(profile.budget! / 7 / profile.people)} per person a day`}
+          </span>
+        </span>
+        <span className="flex items-center gap-3">
+          <button
+            type="button"
+            className="grid size-9 place-items-center rounded-full border border-line-2 bg-card text-lg disabled:opacity-35"
+            disabled={!none && profile.budget! <= step}
+            onClick={() => adjust(-1)}
+            aria-label="Lower budget"
+          >
+            −
+          </button>
+          <span className="tnum min-w-24 text-center font-medium">{none ? "—" : ksh(profile.budget!)}</span>
+          <button
+            type="button"
+            className="grid size-9 place-items-center rounded-full border border-line-2 bg-card text-lg"
+            onClick={() => adjust(1)}
+            aria-label="Raise budget"
+          >
+            +
+          </button>
+        </span>
+      </div>
+      <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
+        For food for the whole household, at typical Nairobi market prices. Cooking gas or charcoal isn&rsquo;t included.
+      </p>
     </div>
   );
 }

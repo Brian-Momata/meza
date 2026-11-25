@@ -15,6 +15,8 @@ export interface Ingredient {
   id: string;
   name: string;
   sw?: string;
+  /** Estimated retail price in KES per kg as bought. */
+  kes: number;
   /** Nutrition per 100 g of the edible part. */
   kcal: number;
   p: number;
@@ -97,7 +99,6 @@ export interface Meal {
   /** Something to do the day before. */
   prepAhead?: string;
   weekendOnly?: boolean;
-  budget?: boolean;
   /** Focal point for object-position when cropping the photo. */
   focus?: string;
 }
@@ -112,6 +113,8 @@ export interface Profile {
   /** Which main meals this household eats. Missing means all three. */
   meals?: MainSlot[];
   fill?: Fill;
+  /** Household food budget in KES per week. Missing means no limit. */
+  budget?: number;
 }
 
 export interface PlannedMeal {

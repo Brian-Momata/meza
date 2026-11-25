@@ -23,6 +23,28 @@ export function lineNutrients(line: RecipeLine): Nutrients {
   return { kcal: ing.kcal * eaten, p: ing.p * eaten, c: ing.c * eaten, f: ing.f * eaten };
 }
 
+/**
+ * What one recipe line costs in KES. Counts the weight you buy, except frying
+ * oil: most of it goes back in the bottle and gets used about three times.
+ */
+export function lineCost(line: RecipeLine): number {
+  const ing = ingredient(line.id);
+  const g = line.eat !== undefined ? line.eat + (line.g - line.eat) / 3 : line.g;
+  return (g / 1000) * ing.kes;
+}
+
+const costCache = new Map<string, number>();
+
+/** KES for one portion of a recipe. */
+export function costPerPortion(r: Recipe | string): number {
+  const rec = typeof r === "string" ? recipe(r) : r;
+  const hit = costCache.get(rec.id);
+  if (hit !== undefined) return hit;
+  const out = rec.lines.reduce((sum, l) => sum + lineCost(l), 0) / rec.yields;
+  costCache.set(rec.id, out);
+  return out;
+}
+
 const portionCache = new Map<string, Nutrients>();
 
 /** Nutrients in one portion of a recipe. */
@@ -49,6 +71,8 @@ export interface MealInfo {
   n: Nutrients;
   plate: PlatePart[];
   plateGrams: number;
+  /** KES per person for a standard plate. */
+  kes: number;
   kinds: Set<Kind>;
   vegetarian: boolean;
   pescatarian: boolean;
@@ -85,6 +109,7 @@ function buildInfo(meal: Meal): MealInfo {
     n,
     plate,
     plateGrams: plate.reduce((s, p) => s + p.grams, 0),
+    kes: meal.parts.reduce((s, p) => s + costPerPortion(p.recipe) * (p.qty ?? 1), 0),
     kinds,
     vegetarian: !meat && !kinds.has("fish"),
     pescatarian: !meat,
@@ -103,6 +128,11 @@ export function info(id: string): MealInfo {
 
 export function kcalOf(id: string): number {
   return MEAL_INFO[id]?.n.kcal ?? 0;
+}
+
+/** KES per person for a standard plate of this meal. */
+export function costOf(id: string): number {
+  return MEAL_INFO[id]?.kes ?? 0;
 }
 
 export function fitsProfile(id: string, profile: Pick<Profile, "diet" | "avoid">): boolean {

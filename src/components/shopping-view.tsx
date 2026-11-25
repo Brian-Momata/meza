@@ -4,8 +4,8 @@ import { Check, Copy, Leaf, MessageCircle, RotateCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { MEALS } from "@/lib/data/meals";
 import { addDays, dayNum, rangeLabel, shortDay, today, weekDates, weekStart } from "@/lib/dates";
-import { buy } from "@/lib/format";
-import { buildShoppingList, type ShopItem } from "@/lib/shopping";
+import { buy, ksh } from "@/lib/format";
+import { buildShoppingList, itemCost, type ShopItem } from "@/lib/shopping";
 import { clearChecked, ensureWeek, toggleChecked } from "@/lib/store";
 import { usePlan } from "@/lib/use-plan";
 import { Chip, MobileTopBar, PageHeader, Skeleton, Toggle } from "./ui";
@@ -57,6 +57,8 @@ export function ShoppingView() {
     .filter((g) => g.items.length);
   const all = visible.flatMap((g) => g.items);
   const done = all.filter((i) => app.checked[i.ingredient.id]).length;
+  const cost = all.reduce((sum, i) => sum + itemCost(i), 0);
+  const toBuy = all.filter((i) => !app.checked[i.ingredient.id]).reduce((sum, i) => sum + itemCost(i), 0);
   const mealCount = selected.reduce((n, d) => n + Object.values(app.days[d] ?? {}).filter(Boolean).length, 0);
 
   const choose = (p: Preset) => {
@@ -82,6 +84,7 @@ export function ShoppingView() {
       for (const i of items) lines.push(`- ${i.ingredient.name}: ${buy(i.ingredient, i.grams).main}`);
       lines.push("");
     }
+    if (toBuy > 0) lines.push(`About ${ksh(toBuy)} in all`);
     return lines.join("\n").trim();
   };
 
@@ -189,6 +192,17 @@ export function ShoppingView() {
                 <div className="h-full rounded-full bg-forest transition-all duration-500" style={{ width: `${all.length ? (done / all.length) * 100 : 0}%` }} />
               </div>
 
+              <div className="mt-6 border-t border-line pt-5">
+                <div className="eyebrow text-muted">Estimated cost</div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="font-display tnum text-[32px] leading-none">{ksh(toBuy)}</span>
+                  <span className="text-sm text-muted">{done ? `left of ${ksh(cost)}` : "for this list"}</span>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-muted">
+                  At typical Nairobi prices, for what the meals use. Whole packets cost more up front but last longer.
+                </p>
+              </div>
+
               <div className="mt-6 grid gap-2">
                 <a
                   href={`https://wa.me/?text=${encodeURIComponent(asText())}`}
@@ -259,6 +273,8 @@ function Row({ item, checked, longRange }: { item: ShopItem; checked: boolean; l
               </span>
             )}
             <span className="truncate">
+              <span className="tnum">≈ {ksh(itemCost(item))}</span>
+              {uses.length > 0 && " · "}
               {uses.slice(0, 3).join(" · ")}
               {uses.length > 3 && ` +${uses.length - 3}`}
             </span>

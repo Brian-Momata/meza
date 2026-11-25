@@ -8,7 +8,7 @@ import { saveProfile, useApp } from "@/lib/store";
 import { joinHousehold } from "@/lib/sync";
 import type { Profile } from "@/lib/types";
 import { Logo } from "./logo";
-import { DEFAULT_PROFILE, DietField, HabitsField, MealsField, PeopleField, TargetField } from "./profile-fields";
+import { BudgetField, DEFAULT_PROFILE, DietField, HabitsField, MealsField, PeopleField, TargetField } from "./profile-fields";
 
 const STEPS = [
   {
@@ -20,6 +20,11 @@ const STEPS = [
     eyebrow: "Your goal",
     title: "How much energy does each person need?",
     body: "We pick meals that land close to this every day, and size every portion to match.",
+  },
+  {
+    eyebrow: "Your budget",
+    title: "How much can you spend on food each week?",
+    body: "We keep the week's meals within it. Spend less on a Tuesday and there's more for pilau on Saturday.",
   },
   {
     eyebrow: "Your day",
@@ -92,7 +97,8 @@ export function Onboarding() {
               {[
                 ["A week of real Kenyan food", "Githeri on Tuesday, tilapia on Thursday, pilau on Saturday. Balanced, varied, and never the same thing twice in a row."],
                 ["Portions that match your calories", "Every recipe is weighed, so each plate tells you exactly how much ugali, stew and sukuma makes your number."],
-                ["One market list", "Scaled to your household, grouped by mama mboga, butchery and duka, and ready to send on WhatsApp."],
+                ["Within your budget", "Tell us what you spend on food a week and the plan stays inside it."],
+                ["One market list", "Scaled to your household, priced, grouped by mama mboga, butchery and duka, and ready to send on WhatsApp."],
               ].map(([h, b], i) => (
                 <li key={h} className="flex gap-4">
                   <span className="font-display tnum mt-0.5 text-lg text-clay">0{i + 1}</span>
@@ -167,8 +173,9 @@ export function Onboarding() {
             <div className="mt-8">
               {step === 0 && <PeopleField profile={profile} set={set} />}
               {step === 1 && <TargetField profile={profile} set={set} />}
-              {step === 2 && <MealsField profile={profile} set={set} />}
-              {step === 3 && (
+              {step === 2 && <BudgetField profile={profile} set={set} />}
+              {step === 3 && <MealsField profile={profile} set={set} />}
+              {step === 4 && (
                 <div className="space-y-8">
                   <DietField profile={profile} set={set} />
                   <HabitsField profile={profile} set={set} />

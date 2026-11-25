@@ -22,7 +22,6 @@ const list: Meal[] = [
     parts: [{ recipe: "uji" }, { recipe: "ngwaci" }],
     region: "Western",
     minutes: 30,
-    budget: true,
     order: "Put the sweet potatoes on to boil, then make the uji. Both are ready at about the same time.",
   },
   {
@@ -34,7 +33,6 @@ const list: Meal[] = [
     parts: [{ recipe: "nduma" }, { recipe: "ngwaci" }, { recipe: "chai" }],
     region: "Central",
     minutes: 40,
-    budget: true,
     order: "Boil the arrowroots and sweet potatoes in separate pots. Arrowroots take about ten minutes longer. Make chai at the end.",
   },
   {
@@ -91,7 +89,6 @@ const list: Meal[] = [
     parts: [{ recipe: "ndizi-chemsha" }, { recipe: "chai" }],
     region: "Western",
     minutes: 35,
-    budget: true,
   },
 
   // ── Lunch & supper ────────────────────────────────────────────────────────
@@ -126,7 +123,6 @@ const list: Meal[] = [
     parts: [{ recipe: "githeri" }, { recipe: "parachichi" }],
     region: "Central",
     minutes: 140,
-    budget: true,
     prepAhead: "Soak the maize and beans overnight.",
     order: "Most of the time is unattended boiling. Pressure-cook the soaked githeri to cut it to under an hour.",
   },
@@ -171,7 +167,6 @@ const list: Meal[] = [
     parts: [{ recipe: "omena" }, { recipe: "ugali" }, { recipe: "sukuma" }],
     region: "Nyanza",
     minutes: 50,
-    budget: true,
     focus: "40% 50%",
     order: "Clean and fry the omena first. The sauce can simmer while you make ugali and sukuma.",
   },
@@ -195,7 +190,6 @@ const list: Meal[] = [
     parts: [{ recipe: "ndengu" }, { recipe: "wali" }, { recipe: "kachumbari" }],
     region: "Countrywide",
     minutes: 55,
-    budget: true,
     prepAhead: "Soak the ndengu tonight or first thing in the morning; it halves the cooking time.",
   },
   {
@@ -253,7 +247,6 @@ const list: Meal[] = [
     parts: [{ recipe: "wali" }, { recipe: "beans-stew" }, { recipe: "kachumbari" }],
     region: "Countrywide",
     minutes: 100,
-    budget: true,
     prepAhead: "Soak the beans overnight.",
   },
   {
@@ -265,7 +258,6 @@ const list: Meal[] = [
     parts: [{ recipe: "ugali" }, { recipe: "managu" }, { recipe: "mala" }],
     region: "Rift Valley",
     minutes: 40,
-    budget: true,
     focus: "50% 45%",
   },
   {
@@ -288,7 +280,6 @@ const list: Meal[] = [
     parts: [{ recipe: "ugali" }, { recipe: "sukuma" }, { recipe: "mayai-kaanga" }],
     region: "Countrywide",
     minutes: 35,
-    budget: true,
     order: "Make the sukuma, then the ugali. Scramble the eggs in the last few minutes.",
   },
   {
@@ -300,7 +291,6 @@ const list: Meal[] = [
     parts: [{ recipe: "ugali", qty: 0.75 }, { recipe: "kabichi" }, { recipe: "beans-stew" }],
     region: "Countrywide",
     minutes: 100,
-    budget: true,
     prepAhead: "Soak the beans overnight.",
   },
 
@@ -334,7 +324,6 @@ const list: Meal[] = [
     parts: [{ recipe: "njugu" }],
     region: "Countrywide",
     minutes: 15,
-    budget: true,
   },
   {
     id: "embe-ndizi",

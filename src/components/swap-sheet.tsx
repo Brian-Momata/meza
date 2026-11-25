@@ -4,9 +4,9 @@ import { Check, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { MEALS } from "@/lib/data/meals";
 import { enDay, monthDay } from "@/lib/dates";
-import { kcal } from "@/lib/format";
+import { kcal, ksh } from "@/lib/format";
 import { MEAL_INFO } from "@/lib/nutrition";
-import { alternatives, SLOT_META } from "@/lib/planner";
+import { alternatives, pmCost, SLOT_META } from "@/lib/planner";
 import { setMeal, useApp } from "@/lib/store";
 import type { Slot } from "@/lib/types";
 import { MealPhoto, Sheet } from "./ui";
@@ -34,6 +34,7 @@ export function SwapSheet({
 
   if (!profile) return null;
   const meta = target ? SLOT_META[target.slot] : null;
+  const currentKes = target ? pmCost(day[target.slot]) * profile.people : 0;
 
   return (
     <Sheet
@@ -46,7 +47,8 @@ export function SwapSheet({
       title="Swap this meal"
     >
       <p className="-mt-1 text-sm text-muted">
-        Sorted by how well each one fits the rest of the day, against your {kcal(profile.target)} kcal goal.
+        Sorted by how well each one fits the rest of the day, against your {kcal(profile.target)} kcal goal. Prices are for all{" "}
+        {profile.people}.
       </p>
       <label className="mt-4 flex items-center gap-2.5 rounded-2xl border border-line-2 bg-card px-4 py-3 focus-within:border-forest">
         <Search className="size-4 text-muted" />
@@ -63,6 +65,8 @@ export function SwapSheet({
           const m = MEALS[o.id];
           const isCurrent = o.id === current;
           const diff = o.dayTotal - profile.target;
+          const kes = o.kes * profile.people;
+          const dKes = Math.round(kes - currentKes);
           return (
             <li key={o.id}>
               <button
@@ -91,6 +95,11 @@ export function SwapSheet({
                       ({diff > 0 ? "+" : ""}
                       {kcal(diff)})
                     </span>
+                    {" · "}
+                    {ksh(kes)}
+                    {!isCurrent && current && Math.abs(dKes) >= 5 && (
+                      <span className={dKes < 0 ? "text-forest" : "text-muted"}> ({dKes < 0 ? `${ksh(-dKes)} less` : `${ksh(dKes)} more`})</span>
+                    )}
                   </span>
                 </span>
                 {isCurrent ? (

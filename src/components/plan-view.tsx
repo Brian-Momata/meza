@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { MEALS } from "@/lib/data/meals";
 import { addDays, dayNum, enDay, monthDay, rangeLabel, shortDay, swDay, today, weekDates, weekStart } from "@/lib/dates";
-import { kcal, portions, recipeHref } from "@/lib/format";
-import { daySlots, dayTotal, pmKcal, SLOT_META } from "@/lib/planner";
+import { kcal, ksh, portions, recipeHref } from "@/lib/format";
+import { daySlots, dayTotal, hasBudget, householdDayCost, pmCost, pmKcal, SLOT_META } from "@/lib/planner";
 import { reshuffleWeek, toggleLock, useApp } from "@/lib/store";
 import type { DayPlan, Profile, Slot } from "@/lib/types";
 import { usePlan } from "@/lib/use-plan";
@@ -41,6 +41,8 @@ export function PlanView() {
   const totals = dates.map((d) => dayTotal(app.days[d])).filter(Boolean);
   const avg = totals.length ? totals.reduce((a, b) => a + b, 0) / totals.length : 0;
   const mealCount = dates.reduce((n, d) => n + daySlots(app.days[d]).length, 0);
+  const weekCost = dates.reduce((sum, d) => sum + householdDayCost(app.days[d], profile), 0);
+  const over = hasBudget(profile) ? weekCost - profile.budget! : 0;
   const title = offset === 0 ? "This week" : offset === 1 ? "Next week" : `Week of ${monthDay(week)}`;
 
   const shuffle = () => {
@@ -91,6 +93,7 @@ export function PlanView() {
         <span className="tnum">
           {mealCount} meals for {profile.people} · averaging <span className="font-medium text-ink">{kcal(avg)} kcal</span> a day each. Lock a meal to keep it when you shuffle.
         </span>
+        <BudgetLine weekCost={weekCost} over={over} profile={profile} />
       </PageHeader>
 
       {/* Day strip */}
@@ -130,6 +133,34 @@ export function PlanView() {
 
       <SwapSheet target={swap} onClose={() => setSwap(null)} />
     </main>
+  );
+}
+
+function BudgetLine({ weekCost, over, profile }: { weekCost: number; over: number; profile: Profile }) {
+  if (!hasBudget(profile)) {
+    return (
+      <span className="tnum mt-1 block">
+        Food for the week comes to about <span className="font-medium text-ink">{ksh(weekCost)}</span>.{" "}
+        <Link href="/settings" className="text-forest underline-offset-2 hover:underline">
+          Set a budget
+        </Link>
+      </span>
+    );
+  }
+  // A few shillings over is rounding, not a broken budget.
+  const ok = over <= profile.budget! * 0.02;
+  return (
+    <span className="tnum mt-1 block">
+      Food for the week: <span className={`font-medium ${ok ? "text-ink" : "text-clay"}`}>{ksh(weekCost)}</span> of your {ksh(profile.budget!)} budget
+      {ok ? (
+        <span className="text-forest"> · {ksh(Math.max(0, -over))} to spare</span>
+      ) : (
+        <span className="text-clay">
+          {" "}
+          · {ksh(over)} over. Swap in a cheaper meal or shuffle; if it stays over, {kcal(profile.target)} kcal a day costs more than this budget.
+        </span>
+      )}
+    </span>
   );
 }
 
@@ -176,6 +207,7 @@ function DaySection({
           </div>
           <span className="tnum text-sm text-ink-2">
             <span className="font-semibold text-ink">{kcal(total)}</span> kcal
+            {total > 0 && <span className="text-muted"> · {ksh(householdDayCost(day, profile))}</span>}
           </span>
         </div>
       </div>
@@ -207,7 +239,7 @@ function DaySection({
                 </Link>
                 <div className="mt-auto flex items-center justify-between gap-2 pt-1.5 md:pt-3">
                   <span className="tnum text-[13px] text-muted">
-                    {kcal(pmKcal(pm))} kcal
+                    {kcal(pmKcal(pm))} kcal · {ksh(pmCost(pm) * profile.people)}
                     {pm.scale && pm.scale !== 1 && <span className="text-[#7a5410]"> · {portions(pm.scale)}</span>}
                   </span>
                   {!past && (

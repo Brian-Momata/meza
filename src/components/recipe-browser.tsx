@@ -4,7 +4,7 @@ import { Clock, Heart, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { MEAL_LIST } from "@/lib/data/meals";
-import { duration, kcal } from "@/lib/format";
+import { duration, kcal, ksh } from "@/lib/format";
 import { MEAL_INFO } from "@/lib/nutrition";
 import { toggleFavorite, useApp } from "@/lib/store";
 import type { Meal } from "@/lib/types";
@@ -18,7 +18,8 @@ const FILTERS: { id: string; label: string; test: (m: Meal, fav: string[]) => bo
   { id: "veg", label: "Vegetarian", test: (m) => MEAL_INFO[m.id].vegetarian },
   { id: "fish", label: "Fish", test: (m) => MEAL_INFO[m.id].kinds.has("fish") },
   { id: "quick", label: "Under 45 min", test: (m) => m.minutes <= 45 },
-  { id: "budget", label: "Budget", test: (m) => !!m.budget },
+  // Cheap for the energy it gives: KSh 125 or less per 1,000 kcal.
+  { id: "budget", label: "Budget", test: (m) => MEAL_INFO[m.id].kes / MEAL_INFO[m.id].n.kcal <= 0.125 },
   { id: "protein", label: "High protein", test: (m) => MEAL_INFO[m.id].highProtein },
   { id: "coast", label: "Coastal", test: (m) => m.region === "Coast" },
   { id: "saved", label: "Saved", test: (m, fav) => fav.includes(m.id) },
@@ -29,6 +30,7 @@ const SORTS = {
   light: { label: "Lightest first", fn: (a: Meal, b: Meal) => MEAL_INFO[a.id].n.kcal - MEAL_INFO[b.id].n.kcal },
   protein: { label: "Most protein", fn: (a: Meal, b: Meal) => MEAL_INFO[b.id].n.p - MEAL_INFO[a.id].n.p },
   quick: { label: "Quickest", fn: (a: Meal, b: Meal) => a.minutes - b.minutes },
+  cheap: { label: "Cheapest first", fn: (a: Meal, b: Meal) => MEAL_INFO[a.id].kes - MEAL_INFO[b.id].kes },
 } as const;
 
 const SUGGESTIONS = ["ugali", "coconut", "beans", "chapati", "fish", "githeri"];
@@ -150,6 +152,8 @@ function RecipeCard({ meal, saved }: { meal: Meal; saved: boolean }) {
             <span>
               <span className="font-medium text-ink-2">{kcal(n.kcal)}</span> kcal
             </span>
+            <span className="text-line-2">·</span>
+            <span>{ksh(MEAL_INFO[meal.id].kes)}</span>
             <span className="text-line-2">·</span>
             <span className="inline-flex items-center gap-1">
               <Clock className="size-3" /> {duration(meal.minutes)}

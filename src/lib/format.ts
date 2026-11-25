@@ -151,6 +151,12 @@ export function recipeHref(id: string, scale?: number) {
   return scale && scale !== 1 ? `/recipes/${id}?p=${scale}` : `/recipes/${id}`;
 }
 
+/** "KSh 1,250". Small sums to the shilling, larger ones to the nearest 10. */
+export function ksh(n: number) {
+  const v = n >= 1000 ? Math.round(n / 10) * 10 : Math.round(n);
+  return `KSh ${v.toLocaleString("en-KE")}`;
+}
+
 export function kcal(n: number) {
   return Math.round(n).toLocaleString("en-KE");
 }

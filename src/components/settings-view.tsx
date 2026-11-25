@@ -8,7 +8,7 @@ import { resetEverything, saveProfile } from "@/lib/store";
 import type { Profile } from "@/lib/types";
 import { usePlan } from "@/lib/use-plan";
 import { HouseholdPanel } from "./household-panel";
-import { DietField, HabitsField, MealsField, PeopleField, TargetField } from "./profile-fields";
+import { BudgetField, DietField, HabitsField, MealsField, PeopleField, TargetField } from "./profile-fields";
 import { MobileTopBar, PageHeader, Skeleton } from "./ui";
 
 export function SettingsView() {
@@ -40,7 +40,8 @@ export function SettingsView() {
     before.quickWeekdays !== draft.quickWeekdays ||
     before.avoid.join() !== draft.avoid.join() ||
     (before.meals ?? []).join() !== (draft.meals ?? []).join() ||
-    (before.fill ?? "portions") !== (draft.fill ?? "portions");
+    (before.fill ?? "portions") !== (draft.fill ?? "portions") ||
+    (before.budget ?? 0) !== (draft.budget ?? 0);
 
   const save = () => {
     const clean = {
@@ -65,19 +66,22 @@ export function SettingsView() {
       <Section n="02" title="Daily energy" hint="Per person, per day.">
         <TargetField profile={draft} set={set} />
       </Section>
-      <Section n="03" title="Meals a day" hint="Fewer meals means bigger plates or a snack or two, so every day still reaches your goal.">
+      <Section n="03" title="Food budget" hint="Per week, for the whole household. The plan stays within it.">
+        <BudgetField profile={draft} set={set} />
+      </Section>
+      <Section n="04" title="Meals a day" hint="Fewer meals means bigger plates or a snack or two, so every day still reaches your goal.">
         <MealsField profile={draft} set={set} />
       </Section>
-      <Section n="04" title="How you eat">
+      <Section n="05" title="How you eat">
         <div className="space-y-8">
           <DietField profile={draft} set={set} />
           <HabitsField profile={draft} set={set} />
         </div>
       </Section>
-      <Section n="05" title="Household" hint="Share one plan and one market list with the people you cook with.">
+      <Section n="06" title="Household" hint="Share one plan and one market list with the people you cook with.">
         <HouseholdPanel />
       </Section>
-      <Section n="06" title="Start over" hint="Clears your plan, ticks and favourites on this phone, and leaves any household.">
+      <Section n="07" title="Start over" hint="Clears your plan, ticks and favourites on this phone, and leaves any household.">
         <button
           type="button"
           onClick={() => {

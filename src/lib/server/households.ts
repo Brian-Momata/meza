@@ -67,7 +67,8 @@ function validValue(field: string, value: unknown): boolean {
       typeof p.quickWeekdays === "boolean" &&
       (p.meals === undefined ||
         (Array.isArray(p.meals) && p.meals.length >= 1 && p.meals.length <= 3 && p.meals.every((m) => MAINS.has(m as string)))) &&
-      (p.fill === undefined || p.fill === "portions" || p.fill === "snacks")
+      (p.fill === undefined || p.fill === "portions" || p.fill === "snacks") &&
+      (p.budget === undefined || (typeof p.budget === "number" && p.budget > 0 && p.budget <= 1_000_000))
     );
   }
   // A day: { breakfast?: { meal, locked?, eaten? }, ... }

@@ -18,6 +18,11 @@ export interface ShopGroup {
   items: ShopItem[];
 }
 
+/** Estimated KSh for the amount the meals use (whole packs cost more up front). */
+export function itemCost(item: ShopItem): number {
+  return (item.grams / 1000) * item.ingredient.kes;
+}
+
 /** Scaled lines of a recipe for `portions` portions. */
 export function scaleRecipe(r: Recipe, portions: number) {
   const k = portions / r.yields;

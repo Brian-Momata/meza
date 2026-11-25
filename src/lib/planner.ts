@@ -1,6 +1,6 @@
 import { MEAL_LIST, MEALS } from "./data/meals";
-import { addDays, isWeekend } from "./dates";
-import { fitsProfile, info, kcalOf } from "./nutrition";
+import { addDays, isWeekend, weekDates, weekStart } from "./dates";
+import { costOf, fitsProfile, info, kcalOf } from "./nutrition";
 import type { DayPlan, Fill, MainSlot, Meal, PlannedMeal, Profile, Slot } from "./types";
 
 export const SLOTS: Slot[] = ["breakfast", "snack", "lunch", "snack2", "supper"];
@@ -58,6 +58,48 @@ export const MAX_SCALE = 2;
 
 export function pmKcal(pm: PlannedMeal | undefined): number {
   return pm ? kcalOf(pm.meal) * (pm.scale ?? 1) : 0;
+}
+
+/** KES per person for a planned plate, at its portion size. */
+export function pmCost(pm: PlannedMeal | undefined): number {
+  return pm ? costOf(pm.meal) * (pm.scale ?? 1) : 0;
+}
+
+/** KES per person for a whole day. */
+export function dayCost(day: DayPlan | undefined): number {
+  return daySlots(day).reduce((sum, s) => sum + pmCost(day![s]), 0);
+}
+
+/** KES for the whole household for a whole day. */
+export function householdDayCost(day: DayPlan | undefined, p: Profile): number {
+  return dayCost(day) * p.people;
+}
+
+export const hasBudget = (p: Profile) => typeof p.budget === "number" && p.budget > 0;
+
+/** An even share of the weekly budget: KES per person per day. */
+export function dailyBudget(p: Profile): number {
+  return hasBudget(p) ? p.budget! / 7 / p.people : Infinity;
+}
+
+/**
+ * What this day may spend per person: what's left of the week's budget after
+ * the days already planned, split over the days still to plan. A cheap Tuesday
+ * leaves room for pilau on Saturday.
+ */
+function allowance(p: Profile, date: string, days: Record<string, DayPlan>, pending: Set<string>): number {
+  if (!hasBudget(p)) return Infinity;
+  const week = weekDates(weekStart(date));
+  let spent = 0;
+  let open = 0;
+  for (const d of week) {
+    // Days with nothing planned yet still get their share, even when a later
+    // call will plan them (onboarding fills the past part of the week last).
+    const cost = pending.has(d) ? 0 : dayCost(days[d]);
+    if (pending.has(d) || !cost) open++;
+    else spent += cost;
+  }
+  return Math.max(0, p.budget! / p.people - spent) / Math.max(1, open);
 }
 
 const quarter = (x: number) => Math.round(x * 4) / 4;
@@ -175,26 +217,31 @@ export function planDays(
   const portionsFirst = fillOf(profile) === "portions";
   const snackCost = portionsFirst ? 25 : 4;
   const scaleCost = portionsFirst ? 10 : 60;
+  const pending = new Set(dates);
 
   for (const date of [...dates].sort()) {
+    const limit = allowance(profile, date, out, pending);
+    pending.delete(date);
     const existing = out[date] ?? {};
     const keep = (s: Slot) => {
       const pm = existing[s];
       return !!pm && (pm.locked || pm.eaten) && !!MEALS[pm.meal];
     };
     const recent = recentUse(out, date);
-    type Opt = { id: string; k: number; pen: number };
+    type Opt = { id: string; k: number; kes: number; pen: number };
     const pools: Opt[][] = slots.map((s) => {
       const snack = isSnack(s);
+      const size = keep(s) && existing[s]!.eaten ? existing[s]!.scale ?? 1 : 1;
       const opt = (id: string): Opt => ({
         id,
-        k: kcalOf(id) * (keep(s) && existing[s]!.eaten ? existing[s]!.scale ?? 1 : 1),
+        k: kcalOf(id) * size,
+        kes: costOf(id) * size,
         // Everyday snacks repeat happily; meals shouldn't.
         pen: repeatPenalty(id, recent) * (snack ? 0.25 : 1) + (snack && optional.includes(s) ? snackCost : 0),
       });
       if (keep(s)) return [opt(existing[s]!.meal)];
       const ids = candidates(s, profile, date).map((m) => opt(m.id));
-      return optional.includes(s) ? [{ id: "", k: 0, pen: 0 }, ...ids] : ids;
+      return optional.includes(s) ? [{ id: "", k: 0, kes: 0, pen: 0 }, ...ids] : ids;
     });
     const fixedSlot = slots.map((s) => isSnack(s) || (keep(s) && !!existing[s]!.eaten));
     const li = slots.indexOf("lunch");
@@ -210,22 +257,33 @@ export function planDays(
       if (i === pools.length) {
         let fixed = 0;
         let base = 0;
+        let fixedKes = 0;
+        let baseKes = 0;
         let score = 0;
         for (let j = 0; j < combo.length; j++) {
           const o = combo[j];
           if (!o.id) continue;
           score += o.pen;
-          if (fixedSlot[j]) fixed += o.k;
-          else base += o.k;
+          if (fixedSlot[j]) {
+            fixed += o.k;
+            fixedKes += o.kes;
+          } else {
+            base += o.k;
+            baseKes += o.kes;
+          }
         }
         let total = fixed + base;
+        let spend = fixedKes + baseKes;
         if (base) {
           const scale = fitScale(profile, fixed, base);
           total = fixed + base * scale;
+          spend = fixedKes + baseKes * scale;
           score += Math.abs(scale - 1) * scaleCost;
         }
         const off = Math.abs(total - profile.target) / profile.target;
         score += off * 150 + Math.max(0, off - 0.08) * 400;
+        // Going over budget outweighs a small calorie miss or a repeat.
+        if (spend > limit) score += 60 + ((spend - limit) / Math.max(limit, 1)) * 500;
         if (li >= 0 && si >= 0) {
           const lunch = combo[li].id;
           const supper = combo[si].id;
@@ -270,13 +328,21 @@ export function alternatives(
   date: string,
   profile: Profile,
   day: DayPlan,
-): { id: string; kcal: number; scale: number; dayTotal: number; fit: number }[] {
+): { id: string; kcal: number; kes: number; scale: number; dayTotal: number; dayKes: number; fit: number }[] {
   const pool = MEAL_LIST.filter((m) => fitsSlot(m, slot) && fitsProfile(m.id, profile));
   return pool
     .map((m) => {
       const next = withScales({ ...day, [slot]: { meal: m.id } }, profile);
       const total = dayTotal(next);
-      return { id: m.id, kcal: pmKcal(next[slot]), scale: next[slot]!.scale ?? 1, dayTotal: total, fit: Math.abs(total - profile.target) };
+      return {
+        id: m.id,
+        kcal: pmKcal(next[slot]),
+        kes: pmCost(next[slot]),
+        scale: next[slot]!.scale ?? 1,
+        dayTotal: total,
+        dayKes: dayCost(next),
+        fit: Math.abs(total - profile.target),
+      };
     })
     .sort((a, b) => a.fit - b.fit);
 }
